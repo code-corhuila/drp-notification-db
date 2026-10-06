@@ -1,0 +1,43 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="002-reports" author="sebastian080502">
+        <comment>Immutable snapshots after generatedAt. Built via owner HTTP APIs, never other tables (ADR-007).</comment>
+        <ext:createCollection collectionName="reports">
+            <ext:options><![CDATA[
+{
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": ["kind", "state", "requestedBy", "periodStart", "periodEnd", "createdAt"],
+      "properties": {
+        "kind": { "bsonType": "string", "enum": ["PAYMENTS_SUMMARY", "RESERVATIONS_SUMMARY", "SPACE_OCCUPANCY"] },
+        "state": { "bsonType": "string", "enum": ["PENDING", "READY", "FAILED"] },
+        "requestedBy": { "bsonType": "string" },
+        "periodStart": { "bsonType": "string" },
+        "periodEnd": { "bsonType": "string" },
+        "idempotencyKey": { "bsonType": "string" },
+        "spaceId": { "bsonType": ["string", "null"] }
+      }
+    }
+  },
+  "validationLevel": "moderate"
+}
+            ]]></ext:options>
+        </ext:createCollection>
+        <ext:createIndex collectionName="reports">
+            <ext:keys>{ "requestedBy": 1, "createdAt": -1 }</ext:keys>
+            <ext:options>{ "name": "idx_reports_requestedBy" }</ext:options>
+        </ext:createIndex>
+        <ext:createIndex collectionName="reports">
+            <ext:keys>{ "idempotencyKey": 1 }</ext:keys>
+            <ext:options>{ "unique": true, "sparse": true, "name": "ux_reports_idempotencyKey" }</ext:options>
+        </ext:createIndex>
+    </changeSet>
+
+</databaseChangeLog>

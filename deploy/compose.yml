@@ -1,0 +1,27 @@
+# Migrate-only (Anexo J / ADR-007). No MongoDB container. Infra must be up first.
+# Official liquibase image does not ship the Mongo extension; lpm installs it at run.
+
+name: ${COMPOSE_PROJECT_NAME:-drp-dev}
+
+services:
+  notification-migrate:
+    image: liquibase/liquibase:4.29.2
+    container_name: drp-notification-migrate
+    user: root
+    entrypoint: ["/bin/bash", "-lc"]
+    command: >
+      lpm add mongodb --global && liquibase update
+      --changelog-table-name=databasechangelog_notification
+      --search-path=/liquibase/changelog
+    environment:
+      LIQUIBASE_COMMAND_URL: ${LIQUIBASE_COMMAND_URL:-mongodb://mongo:27017/notification}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/db.changelog-master.xml
+    volumes:
+      - ..:/liquibase/changelog:ro
+    networks:
+      - mongo
+
+networks:
+  mongo:
+    name: ${NOTIFICATION_DB_NETWORK:-drp-dev_default}
+    external: true
