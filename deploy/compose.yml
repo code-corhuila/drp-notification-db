@@ -14,7 +14,7 @@ services:
       --changelog-table-name=databasechangelog_notification
       --search-path=/liquibase/changelog
     environment:
-      LIQUIBASE_COMMAND_URL: ${LIQUIBASE_COMMAND_URL:-mongodb://mongo:27017/notification}
+      LIQUIBASE_COMMAND_URL: ${LIQUIBASE_COMMAND_URL:?set LIQUIBASE_COMMAND_URL via --env-file}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/db.changelog-master.xml
     volumes:
       - ..:/liquibase/changelog:ro
