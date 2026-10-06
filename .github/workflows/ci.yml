@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+    branches: [develop, qa, main]
+  pull_request:
+
+jobs:
+  layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anexo J -db layout (Mongo / Liquibase)
+        run: |
+          test -f changelog/db.changelog-master.xml
+          test -f 01_ddl/001-create-notifications.xml
+          test -f 01_ddl/002-create-reports.xml
+          test -f 05_rollbacks/U001__drop_collections.js
+          test -f deploy/compose.yml
+          ! grep -E "image: (postgres|mongo)" deploy/compose.yml
+          grep -q "sourceEventId" 01_ddl/001-create-notifications.xml
+          grep -q 'collectionName="reports"' 01_ddl/002-create-reports.xml
+          grep -q "databasechangelog_notification" deploy/compose.yml
