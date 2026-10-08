@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="001-notifications" author="sebastian080502">
+        <comment>Delivery log. Unique sourceEventId is BR-006 / ADR-007. No PostgreSQL schema.</comment>
+        <ext:createCollection collectionName="notifications">
+            <ext:options><![CDATA[
+{
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "required": ["userId", "sourceEventId", "eventType", "channel", "state", "createdAt"],
+      "properties": {
+        "userId": { "bsonType": "string" },
+        "sourceEventId": { "bsonType": "string" },
+        "eventType": { "bsonType": "string" },
+        "channel": { "bsonType": "string", "enum": ["EMAIL", "IN_APP"] },
+        "state": { "bsonType": "string", "enum": ["PENDING", "SENT", "FAILED"] }
+      }
+    }
+  },
+  "validationLevel": "moderate"
+}
+            ]]></ext:options>
+        </ext:createCollection>
+        <ext:createIndex collectionName="notifications">
+            <ext:keys>{ "sourceEventId": 1 }</ext:keys>
+            <ext:options>{ "unique": true, "name": "ux_notifications_sourceEventId" }</ext:options>
+        </ext:createIndex>
+        <ext:createIndex collectionName="notifications">
+            <ext:keys>{ "userId": 1, "createdAt": -1 }</ext:keys>
+            <ext:options>{ "name": "idx_notifications_user" }</ext:options>
+        </ext:createIndex>
+    </changeSet>
+
+</databaseChangeLog>
