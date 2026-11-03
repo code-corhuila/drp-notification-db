@@ -9,13 +9,13 @@ services:
     container_name: drp-notification-migrate
     user: root
     entrypoint: ["/bin/bash", "-lc"]
-    command: >
-      lpm add mongodb --global && liquibase update
-      --changelog-table-name=databasechangelog_notification
-      --search-path=/liquibase/changelog
+    # One argv: `bash -lc` only runs $1. Space-split command ran `lpm` and printed help.
+    command:
+      - "lpm add mongodb --global && lpm add liquibase-mongodb --global && liquibase --driver=liquibase.ext.mongodb.database.MongoClientDriver --database-changelog-table-name=databasechangelog_notification update"
     environment:
       LIQUIBASE_COMMAND_URL: ${LIQUIBASE_COMMAND_URL:?set LIQUIBASE_COMMAND_URL via --env-file}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/db.changelog-master.xml
+      LIQUIBASE_SEARCH_PATH: /liquibase/changelog
     volumes:
       - ..:/liquibase/changelog:ro
     networks:

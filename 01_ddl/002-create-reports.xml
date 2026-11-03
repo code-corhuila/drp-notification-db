@@ -7,6 +7,11 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="002-reports" author="sebastian080502">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <ext:collectionExists collectionName="reports"/>
+            </not>
+        </preConditions>
         <comment>Immutable snapshots after generatedAt. Built via owner HTTP APIs, never other tables (ADR-007).</comment>
         <ext:createCollection collectionName="reports">
             <ext:options><![CDATA[
@@ -30,6 +35,9 @@
 }
             ]]></ext:options>
         </ext:createCollection>
+    </changeSet>
+
+    <changeSet id="002-reports-indexes" author="sebastian080502">
         <ext:createIndex collectionName="reports">
             <ext:keys>{ "requestedBy": 1, "createdAt": -1 }</ext:keys>
             <ext:options>{ "name": "idx_reports_requestedBy" }</ext:options>
