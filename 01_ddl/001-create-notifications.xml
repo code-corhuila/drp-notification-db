@@ -7,6 +7,11 @@
                         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="001-notifications" author="sebastian080502">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <ext:collectionExists collectionName="notifications"/>
+            </not>
+        </preConditions>
         <comment>Delivery log. Unique sourceEventId is BR-006 / ADR-007. No PostgreSQL schema.</comment>
         <ext:createCollection collectionName="notifications">
             <ext:options><![CDATA[
@@ -28,6 +33,10 @@
 }
             ]]></ext:options>
         </ext:createCollection>
+    </changeSet>
+
+    <changeSet id="001-notifications-indexes" author="sebastian080502">
+        <comment>BR-006 unique sourceEventId. Safe if the API created the collection on first insert.</comment>
         <ext:createIndex collectionName="notifications">
             <ext:keys>{ "sourceEventId": 1 }</ext:keys>
             <ext:options>{ "unique": true, "name": "ux_notifications_sourceEventId" }</ext:options>

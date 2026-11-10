@@ -4,7 +4,7 @@ Mongo database `notification`. **Migrations only.** Instance: [`drp-infra-mongo`
 
 This domain has **no PostgreSQL schema** (ADR-007). Collections: `notifications` (unique `sourceEventId`) and `reports` (immutable snapshots after `generatedAt`). Reports are built by calling owner HTTP APIs, never their tables.
 
-Honest gap: `drp-infra-mongo` still has no compose on `develop`; the migrate job expects host `mongo:27017` on the shared compose network once that engine exists.
+The migrate job talks to host `mongo:27017` on the shared compose network (`drp-dev_default`). Use a URL that can `collMod` (local: Mongo root). `notification_app` stays `readWrite` for `-api`.
 
 ## Layout (Anexo J)
 
@@ -27,7 +27,7 @@ Control collection: `databasechangelog_notification`.
 docker compose --env-file .env.example -f deploy/compose.yml run --rm notification-migrate
 ```
 
-First run needs network so the job can `lpm add mongodb` (the community Liquibase image does not ship the extension).
+First run needs network (`lpm add mongodb` + `lpm add liquibase-mongodb`). The community image does not ship the extension.
 
 Corte 2 UI (`drp-front`) does **not** need this migrate: it uses synthetic contract data.
 
